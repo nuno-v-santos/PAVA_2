@@ -1,7 +1,7 @@
 #lang racket
 (provide add-active-token def-active-token process-string)
 
-Define functions:
+#|Define functions:
 
 add-active-token, that takes a string describing an active token and a function that should be triggered
 when that token is found. This last function takes a string and returns a string. The function
@@ -17,3 +17,4 @@ Def macro:
 
 def-active-token, that takes an active token, a parameter list, and a body and that expands into an
 appropriate use of the function add-active-token.
+|#
