@@ -82,9 +82,7 @@ expands into an appropriate use of the function add-active-token.|#
 
 ;String Interpolation
 (def-active-token "#" (str)
-  ;do stuff
-  "b"
-  )
+  (regexp-replace* #px"#[{](\\S+)[}]" str "\" + (\\1) + \""))
 
 ;Type Aliases
 (def-active-token "alias" (str)
