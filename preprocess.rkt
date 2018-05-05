@@ -86,6 +86,11 @@ expands into an appropriate use of the function add-active-token.|#
 
 ;Type Aliases
 (def-active-token "alias" (str)
-  ;do stuff
-  "c"
+  (let* ([alias-op (regexp-match #px"[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*(\\S+)[[:space:]]*;" str)]
+         [left-alias (cadr alias-op)]
+         [right-alias (caddr alias-op)])
+    ;(set! str (regexp-replace #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*\\S+[[:space:]]*;" ""))
+    (set! str (string-replace str left-alias right-alias))
+    str
+    )
   )
