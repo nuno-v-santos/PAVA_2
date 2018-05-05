@@ -75,9 +75,10 @@ expands into an appropriate use of the function add-active-token.|#
 
 ;Local Type Inference
 (def-active-token "var" (str)
-  ;do stuff
-  "a"
-  )
+  (let* ([initial (cdar (regexp-match-positions #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*new" str))]
+        [end (- (cdar (regexp-match-positions #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*new[[:space:]]+\\S+[(][)][;]" str)) 3)]
+        [type (string-trim(substring str initial end))])
+    (string-append type str)))
 
 ;String Interpolation
 (def-active-token "#" (str)
