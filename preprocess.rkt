@@ -6,6 +6,13 @@
 ;stores the pairs <token,function>
 (define tokens '())
 
+#|def-active-token
+takes an active token, a parameter list, and a body
+expands into an appropriate use of the function add-active-token.|#
+(define-syntax-rule
+  (def-active-token token (var) body)
+  (add-active-token token (lambda (var) body)))
+
 
 #|add-active-token
 takes a string describing an active token and a function that should be triggered when that token is found.
@@ -14,7 +21,6 @@ This function stores the association between the token and the corresponding fun
 (define (add-active-token token f)
   (set! tokens (append tokens (list (list token f)))))   ;stores the function
   
-
 
 #|process-string
 takes a string and returns a string and is responsible for triggering the active token actions,
@@ -44,14 +50,6 @@ and the result of that function replaces the substring that starts with the toke
 )
 
 
-#|def-active-token
-takes an active token, a parameter list, and a body
-expands into an appropriate use of the function add-active-token.|#
-(define-syntax-rule
-  (def-active-token token (var) body)
-  (add-active-token token (lambda (var) body)))
-
-
 
 ;some tokens from project description
 (def-active-token ";;" (str)
@@ -73,11 +71,12 @@ expands into an appropriate use of the function add-active-token.|#
 
 ;tokens that we need to define
 
+;^(?!.*(red|green|blue))
+
 ;Local Type Inference
 (def-active-token "var" (str)
-  (let* ([initial (cdar (regexp-match-positions #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*new" str))]
-        [end (- (cdar (regexp-match-positions #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*new[[:space:]]+\\S+[(][)][;]" str)) 3)]
-        [type (string-trim(substring str initial end))])
+  (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[(][[:word:] ,]*[)][;]" str "\\1")])
+    (displayln type)
     (string-append type str)))
 
 ;String Interpolation
