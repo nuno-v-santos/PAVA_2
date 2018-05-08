@@ -28,14 +28,20 @@ transforming the string until no more active tokens are found.
 To this end, whenever an active token is found, the associated function is called with the substring that starts immediately after the token,
 and the result of that function replaces the substring that starts with the token.|#
 (define (process-string str)
+  (define oldStr str)
   (for ([entry tokens])                                                   ;for each defined token
     (let ([token (car entry)]
           [f (cadr entry)])
-      (define token-match (regexp-match-positions token str))             ;tries to find the token in the string 
-      (set! str (transform-tokens str token-match f token))     
+      (define token-match (regexp-match-positions token str)) ;tries to find the token in the string 
+      (if (equal? token-match #f)
+          (displayln "token not found")    
+          (set! str (transform-string str f token-match)) ;transforms the string
+      ;(set! str (transform-tokens str token-match f token))     
     )
-  )     
-  str
+  ))
+  (if (equal? oldStr str)
+      str
+      (process-string str))
 )
 
 (define (transform-tokens str token-match f token)
@@ -85,10 +91,10 @@ and the result of that function replaces the substring that starts with the toke
 (def-active-token "var" (str)
   (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[(][[:word:] ,]*[)][;]" str "\\1")])
     (displayln type)
-    ;(if (equal? type str);if didn't found match
-     ;   (string-append "var" str)
+    (if (equal? type str);if didn't found match
+        (string-append "var" str)
         (string-append type str)
-     ;   )
+        )
     ))
 
 ;String Interpolation
