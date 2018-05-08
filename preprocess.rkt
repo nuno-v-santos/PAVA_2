@@ -1,887 +1,107 @@
-#reader(lib"read.ss""wxme")WXME0108 ## 
-#|
-   This file uses the GRacket editor format.
-   Open this file in DrRacket version 6.7 or later to read it.
+#lang racket
+(provide add-active-token def-active-token process-string)
+;(require dyoo-while-loop)
 
-   Most likely, it was created by saving a program in DrRacket,
-   and it probably contains a program with non-text elements
-   (such as images or comment boxes).
+;List that saves the tokens that were defined
+;stores the pairs <token,function>
+(define tokens '())
 
-            http://racket-lang.org/
-|#
- 32 7 #"wxtext\0"
-3 1 6 #"wxtab\0"
-1 1 8 #"wximage\0"
-2 0 8 #"wxmedia\0"
-4 1 34 #"(lib \"syntax-browser.ss\" \"mrlib\")\0"
-1 0 36 #"(lib \"cache-image-snip.ss\" \"mrlib\")\0"
-1 0 68
-(
- #"((lib \"image-core.ss\" \"mrlib\") (lib \"image-core-wxme.rkt\" \"mr"
- #"lib\"))\0"
-) 1 0 16 #"drscheme:number\0"
-3 0 44 #"(lib \"number-snip.ss\" \"drscheme\" \"private\")\0"
-1 0 36 #"(lib \"comment-snip.ss\" \"framework\")\0"
-1 0 93
-(
- #"((lib \"collapsed-snipclass.ss\" \"framework\") (lib \"collapsed-sni"
- #"pclass-wxme.ss\" \"framework\"))\0"
-) 0 0 43 #"(lib \"collapsed-snipclass.ss\" \"framework\")\0"
-0 0 19 #"drscheme:sexp-snip\0"
-0 0 29 #"drscheme:bindings-snipclass%\0"
-1 0 101
-(
- #"((lib \"ellipsis-snip.rkt\" \"drracket\" \"private\") (lib \"ellipsi"
- #"s-snip-wxme.rkt\" \"drracket\" \"private\"))\0"
-) 2 0 88
-(
- #"((lib \"pict-snip.rkt\" \"drracket\" \"private\") (lib \"pict-snip.r"
- #"kt\" \"drracket\" \"private\"))\0"
-) 0 0 34 #"(lib \"bullet-snip.rkt\" \"browser\")\0"
-0 0 25 #"(lib \"matrix.ss\" \"htdp\")\0"
-1 0 22 #"drscheme:lambda-snip%\0"
-1 0 29 #"drclickable-string-snipclass\0"
-0 0 26 #"drracket:spacer-snipclass\0"
-0 0 57
-#"(lib \"hrule-snip.rkt\" \"macro-debugger\" \"syntax-browser\")\0"
-1 0 26 #"drscheme:pict-value-snip%\0"
-0 0 45 #"(lib \"image-snipr.ss\" \"slideshow\" \"private\")\0"
-1 0 38 #"(lib \"pict-snipclass.ss\" \"slideshow\")\0"
-2 0 55 #"(lib \"vertical-separator-snip.ss\" \"stepper\" \"private\")\0"
-1 0 18 #"drscheme:xml-snip\0"
-1 0 31 #"(lib \"xml-snipclass.ss\" \"xml\")\0"
-1 0 21 #"drscheme:scheme-snip\0"
-2 0 34 #"(lib \"scheme-snipclass.ss\" \"xml\")\0"
-1 0 10 #"text-box%\0"
-1 0 32 #"(lib \"text-snipclass.ss\" \"xml\")\0"
-1 0 1 6 #"wxloc\0"
-          0 0 57 0 1 #"\0"
-0 75 1 #"\0"
-0 10 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 0 9
-#"Standard\0"
-0 75 12 #"Courier New\0"
-0 10 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 -1 -1 2 24
-#"framework:default-color\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 255 255 255 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 15
-#"text:ports out\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 93 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 255 0 0 0 0 0 -1
--1 2 15 #"text:ports err\0"
-0 -1 1 #"\0"
-1 0 -1 -1 93 -1 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 17
-#"text:ports value\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 27 #"Matching Parenthesis Style\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:symbol\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 38
-#"framework:syntax-color:scheme:keyword\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 194 116 31 0 0 0 -1 -1 2
-38 #"framework:syntax-color:scheme:comment\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 194 116 31 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:string\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 35
-#"framework:syntax-color:scheme:text\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 39
-#"framework:syntax-color:scheme:constant\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 49
-#"framework:syntax-color:scheme:hash-colon-keyword\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 42
-#"framework:syntax-color:scheme:parenthesis\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:error\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:other\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 16
-#"Misspelled Text\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 81 112 203 0 0 0 -1 -1 2
-38 #"drracket:check-syntax:lexically-bound\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 81 112 203 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 28
-#"drracket:check-syntax:set!d\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 37
-#"drracket:check-syntax:unused-require\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
-#"drracket:check-syntax:free-variable\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 68 0 203 0 0 0 -1 -1 2 31
-#"drracket:check-syntax:imported\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 68 0 203 0 0 0 -1 -1 2 47
-#"drracket:check-syntax:my-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 116 0 0 0 0 -1 -1 2 50
-#"drracket:check-syntax:their-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 116 0 0 0 0 -1 -1 2 48
-#"drracket:check-syntax:unk-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 139 142 28 0 0 0 -1 -1 2
-49 #"drracket:check-syntax:both-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 139 142 28 0 0 0 -1 -1 2
-26 #"plt:htdp:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 2 27
-#"plt:htdp:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 4 1
-#"\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 4 #"XML\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 2 37 #"plt:module-language:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 38
-#"plt:module-language:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 4 1
-#"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 100 0 0 0 0 -1
--1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 200 0 0 0 0 0 -1 -1 4 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 255 255 0 -1 -1
-          0 632 0 28 3 12 #"#lang racket"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 14 3 7 #"provide"
-0 0 24 3 1 #" "
-0 0 14 3 16 #"add-active-token"
-0 0 24 3 1 #" "
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"process-string"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 17 3 2 #";("
-0 0 17 3 7 #"require"
-0 0 17 3 1 #" "
-0 0 17 3 16 #"dyoo-while-loop)"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 45 #";List that saves the tokens that were defined"
-0 0 24 29 1 #"\n"
-0 0 17 3 34 #";stores the pairs <token,function>"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"tokens"
-0 0 24 3 1 #" "
-0 0 21 3 1 #"'"
-0 0 24 3 3 #"())"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 18 #"#|def-active-token"
-0 0 17 29 1 #"\n"
-0 0 17 3 51 #"takes an active token, a parameter list, and a body"
-0 0 17 29 1 #"\n"
-0 0 17 3 67
-#"expands into an appropriate use of the function add-active-token.|#"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 18 #"define-syntax-rule"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"var"
-0 0 24 3 2 #") "
-0 0 14 3 4 #"body"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 16 #"add-active-token"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 2 #" ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"var"
-0 0 24 3 2 #") "
-0 0 14 3 4 #"body"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 18 #"#|add-active-token"
-0 0 17 29 1 #"\n"
-0 0 17 3 32 #"takes a string describing an act"
-0 0 17 3 75
-(
- #"ive token and a function that should be triggered when that token is"
- #" found."
-) 0 0 17 29 1 #"\n"
-0 0 17 3 55 #"This last function takes a string and returns a string."
-0 0 17 29 1 #"\n"
-0 0 17 3 88
-(
- #"This function stores the association between the token and the corre"
- #"sponding function.|#"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 2 #" ("
-0 0 14 3 16 #"add-active-token"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 4 #"set!"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"tokens"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"append"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"tokens"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"list"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"list"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 8 #")))))   "
-0 0 17 3 20 #";stores the function"
-0 0 24 29 1 #"\n"
-0 0 24 3 2 #"  "
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 16 #"#|process-string"
-0 0 17 29 1 #"\n"
-0 0 17 3 95
-(
- #"takes a string and returns a string and is responsible for triggerin"
- #"g the active token actions,"
-) 0 0 17 29 1 #"\n"
-0 0 17 3 48 #"transforming the string until no more active tok"
-0 0 17 3 14 #"ens are found."
-0 0 17 29 1 #"\n"
-0 0 17 3 141
-(
- #"To this end, whenever an active token is found, the associated funct"
- #"ion is called with the substring that starts immediately after the t"
- #"oken,"
-) 0 0 17 29 1 #"\n"
-0 0 17 3 84
-(
- #"and the result of that function replaces the substring that starts w"
- #"ith the token.|#"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 2 #" ("
-0 0 14 3 14 #"process-string"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 3 #"for"
-0 0 24 3 3 #" (["
-0 0 14 3 5 #"entry"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"tokens"
-0 0 24 3 53 #"])                                                   "
-0 0 17 3 23 #";for each defined token"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 3 #"let"
-0 0 24 3 3 #" (["
-0 0 14 3 5 #"token"
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"car"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"entry"
-0 0 24 3 2 #")]"
-0 0 24 29 1 #"\n"
-0 0 24 3 11 #"          ["
-0 0 14 3 1 #"f"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"cadr"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"entry"
-0 0 24 3 3 #")])"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 2 #" ("
-0 0 14 3 22 #"regexp-match-positions"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 15 #"))             "
-0 0 17 3 39 #";tries to find the token in the string "
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"set!"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 2 #" ("
-0 0 14 3 16 #"transform-tokens"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 7 #"))     "
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    )"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"  )     "
-0 0 24 29 1 #"\n"
-0 0 24 3 2 #"  "
-0 0 14 3 3 #"str"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 2 #" ("
-0 0 14 3 16 #"transform-tokens"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 2 #"if"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"equal?"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 1 #" "
-0 0 21 3 2 #"#f"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 14 3 3 #"str"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 15 3 4 #"let*"
-0 0 24 3 3 #" (["
-0 0 14 3 3 #"str"
-0 0 24 3 2 #" ("
-0 0 14 3 16 #"transform-string"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 3 #")] "
-0 0 17 3 22 #";transforms the string"
-0 0 24 29 1 #"\n"
-0 0 24 3 14 #"             ["
-0 0 14 3 11 #"token-match"
-0 0 24 3 2 #" ("
-0 0 14 3 22 #"regexp-match-positions"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 4 #")]) "
-0 0 17 3 34 #";tries to find match in new string"
-0 0 24 29 1 #"\n"
-0 0 24 3 9 #"        ("
-0 0 14 3 16 #"transform-tokens"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"token"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 11 #"        )))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 88
-(
- #";with the token match in the string, calls the function f on the str"
- #"ing after the token,"
-) 0 0 24 29 1 #"\n"
-0 0 17 3 73
-(
- #";then appends the string before the token with the result of the fun"
- #"ction"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 2 #" ("
-0 0 14 3 16 #"transform-string"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"pos-token"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"caar"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 15 #"pos-after-token"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"cdar"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"token-match"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"pre-string"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"substring"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 21 3 1 #"0"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"pos-token"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"pos-string"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"substring"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 15 #"pos-after-token"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 17 #"result-pos-string"
-0 0 24 3 2 #" ("
-0 0 14 3 1 #"f"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"pos-string"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 13 #"string-append"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"pre-string"
-0 0 24 3 1 #" "
-0 0 14 3 17 #"result-pos-string"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 37 #";some tokens from project description"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 19 3 4 #"\";;\""
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 2 #"or"
-0 0 24 3 2 #" ("
-0 0 15 3 6 #"for/or"
-0 0 24 3 3 #" (("
-0 0 14 3 1 #"c"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"in-string"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 16 #"               ("
-0 0 14 3 1 #"i"
-0 0 24 3 2 #" ("
-0 0 14 3 11 #"in-naturals"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 9 #"        ("
-0 0 14 3 3 #"and"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"char=?"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"c"
-0 0 24 3 1 #" "
-0 0 21 3 9 #"#\\newline"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 14 #"             ("
-0 0 14 3 9 #"substring"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 2 #" ("
-0 0 14 3 1 #"+"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"i"
-0 0 24 3 1 #" "
-0 0 21 3 1 #"1"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 19 3 2 #"\"\""
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 2 #"ns"
-0 0 24 3 2 #" ("
-0 0 14 3 19 #"make-base-namespace"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 19 3 9 #"\"//eval \""
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 22 #"call-with-input-string"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"   "
-0 0 14 3 3 #"str"
-0 0 24 29 1 #"\n"
-0 0 24 3 4 #"   ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 2 #"in"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"     ("
-0 0 14 3 13 #"string-append"
-0 0 24 3 2 #" ("
-0 0 14 3 2 #"~a"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"eval"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"read"
-0 0 24 3 1 #" "
-0 0 14 3 2 #"in"
-0 0 24 3 2 #") "
-0 0 14 3 2 #"ns"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 21 #"                    ("
-0 0 14 3 12 #"port->string"
-0 0 24 3 1 #" "
-0 0 14 3 2 #"in"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 30 #";tokens that we need to define"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 24 #";^(?!.*(red|green|blue))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 21 #";Local Type Inference"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 19 3 5 #"\"var\""
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 4 #"let*"
-0 0 24 3 3 #" (["
-0 0 14 3 4 #"type"
-0 0 24 3 2 #" ("
-0 0 14 3 14 #"regexp-replace"
-0 0 24 3 1 #" "
-0 0 19 3 109
-(
- #"#px\"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*ne"
- #"w[[:space:]]+(\\\\S+)[(][[:word:] ,]*[)][;]\""
-) 0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 19 3 5 #"\"\\\\1\""
-0 0 24 3 3 #")])"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 9 #"displayln"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"type"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 2 #"if"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"equal?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"type"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 17 3 22 #";if didn't found match"
-0 0 24 29 1 #"\n"
-0 0 24 3 9 #"        ("
-0 0 14 3 13 #"string-append"
-0 0 24 3 1 #" "
-0 0 19 3 5 #"\"var\""
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 9 #"        ("
-0 0 14 3 13 #"string-append"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"type"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 11 #"        )))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 21 #";String Interpolation"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 19 3 3 #"\"#\""
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 14 3 15 #"regexp-replace*"
-0 0 24 3 1 #" "
-0 0 19 3 4 #"#px\""
-0 0 19 3 5 #"#[{]("
-0 0 19 3 8 #"\\\\S+)[}]"
-0 0 19 3 1 #"\""
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 19 3 1 #"\""
-0 0 19 3 2 #"\\\""
-0 0 19 3 1 #" "
-0 0 19 3 1 #"+"
-0 0 19 3 2 #" ("
-0 0 19 3 3 #"\\\\1"
-0 0 19 3 2 #") "
-0 0 19 3 1 #"+"
-0 0 19 3 3 #" \\\""
-0 0 19 3 1 #"\""
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 13 #";Type Aliases"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 16 #"def-active-token"
-0 0 24 3 1 #" "
-0 0 19 3 6 #"\"alias"
-0 0 19 3 1 #"\""
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"str"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 4 #"let*"
-0 0 24 3 3 #" (["
-0 0 14 3 8 #"alias-op"
-0 0 24 3 2 #" ("
-0 0 14 3 12 #"regexp-match"
-0 0 24 3 1 #" "
-0 0 19 3 4 #"#px\""
-0 0 19 3 2 #"[["
-0 0 19 3 7 #":space:"
-0 0 19 3 2 #"]]"
-0 0 19 3 1 #"+"
-0 0 19 3 3 #"([["
-0 0 19 3 6 #":word:"
-0 0 19 3 2 #"]]"
-0 0 19 3 1 #"+"
-0 0 19 3 3 #")[["
-0 0 19 3 7 #":space:"
-0 0 19 3 2 #"]]"
-0 0 19 3 2 #"*="
-0 0 19 3 2 #"[["
-0 0 19 3 7 #":space:"
-0 0 19 3 2 #"]]"
-0 0 19 3 1 #"*"
-0 0 19 3 1 #"("
-0 0 19 3 4 #"\\\\S+"
-0 0 19 3 3 #")[["
-0 0 19 3 7 #":space:"
-0 0 19 3 2 #"]]"
-0 0 19 3 3 #"*;\""
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 2 #")]"
-0 0 24 29 1 #"\n"
-0 0 24 3 10 #"         ["
-0 0 14 3 10 #"left-alias"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"cadr"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"alias-op"
-0 0 24 3 2 #")]"
-0 0 24 29 1 #"\n"
-0 0 24 3 10 #"         ["
-0 0 14 3 11 #"right-alias"
-0 0 24 3 2 #" ("
-0 0 14 3 5 #"caddr"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"alias-op"
-0 0 24 3 3 #")])"
-0 0 24 29 1 #"\n"
-0 0 24 3 4 #"    "
-0 0 17 3 102
-(
- #";(set! str (regexp-replace #px\"[[:space:]]+[[:word:]]+[[:space:]]*="
- #"[[:space:]]*\\\\S+[[:space:]]*;\" \"\"))"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 4 #"set!"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 2 #" ("
-0 0 14 3 14 #"string-replace"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"str"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"left-alias"
-0 0 24 3 1 #" "
-0 0 14 3 11 #"right-alias"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 4 #"    "
-0 0 14 3 3 #"str"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    )"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  )"
-0           0
+#|def-active-token
+takes an active token, a parameter list, and a body
+expands into an appropriate use of the function add-active-token.|#
+(define-syntax-rule
+  (def-active-token token (var) body)
+  (add-active-token token (lambda (var) body)))
+
+
+#|add-active-token
+takes a string describing an active token and a function that should be triggered when that token is found.
+This last function takes a string and returns a string.
+This function stores the association between the token and the corresponding function.|#
+(define (add-active-token token f)
+  (set! tokens (append tokens (list (list token f)))))   ;stores the function
+  
+
+#|process-string
+takes a string and returns a string and is responsible for triggering the active token actions,
+transforming the string until no more active tokens are found.
+To this end, whenever an active token is found, the associated function is called with the substring that starts immediately after the token,
+and the result of that function replaces the substring that starts with the token.|#
+(define (process-string str)
+  (for ([entry tokens])                                                   ;for each defined token
+    (let ([token (car entry)]
+          [f (cadr entry)])
+      (define token-match (regexp-match-positions token str))             ;tries to find the token in the string 
+      (set! str (transform-tokens str token-match f token))     
+    )
+  )     
+  str
+)
+
+(define (transform-tokens str token-match f token)
+  (if (equal? token-match #f)
+      str
+      (let* ([str (transform-string str f token-match)] ;transforms the string
+             [token-match (regexp-match-positions token str)]) ;tries to find match in new string
+        (transform-tokens str token-match f token)
+        )))
+
+;with the token match in the string, calls the function f on the string after the token,
+;then appends the string before the token with the result of the function
+(define (transform-string str f token-match)
+  (define pos-token (caar token-match))
+  (define pos-after-token (cdar token-match))
+  (define pre-string (substring str 0 pos-token))
+  (define pos-string (substring str pos-after-token))
+  (define result-pos-string (f pos-string))
+  (string-append pre-string result-pos-string)
+)
+
+
+
+;some tokens from project description
+(def-active-token ";;" (str)
+  (or (for/or ((c (in-string str))
+               (i (in-naturals)))
+        (and (char=? c #\newline)
+             (substring str (+ i 1))))
+      ""))
+
+(define ns (make-base-namespace))
+(def-active-token "//eval " (str)
+  (call-with-input-string
+   str
+   (lambda (in)
+     (string-append (~a (eval (read in) ns))
+                    (port->string in)))))
+
+
+
+;tokens that we need to define
+
+;^(?!.*(red|green|blue))
+
+;Local Type Inference
+(def-active-token "var" (str)
+  (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[(][[:word:] ,]*[)][;]" str "\\1")])
+    (displayln type)
+    ;(if (equal? type str);if didn't found match
+     ;   (string-append "var" str)
+        (string-append type str)
+     ;   )
+    ))
+
+;String Interpolation
+(def-active-token "#" (str)
+  (regexp-replace* #px"#[{](\\S+)[}]" str "\" + (\\1) + \""))
+
+;Type Aliases
+(def-active-token "alias" (str)
+  (let* ([alias-op (regexp-match #px"[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*(\\S+)[[:space:]]*;" str)]
+         [left-alias (cadr alias-op)]
+         [right-alias (caddr alias-op)])
+    ;(set! str (regexp-replace #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*\\S+[[:space:]]*;" ""))
+    (set! str (string-replace str left-alias right-alias))
+    str
+    )
+  )
