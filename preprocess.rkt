@@ -34,23 +34,14 @@ and the result of that function replaces the substring that starts with the toke
           [f (cadr entry)])
       (define token-match (regexp-match-positions token str)) ;tries to find the token in the string 
       (if (equal? token-match #f)
-          (displayln "token not found")    
-          (set! str (transform-string str f token-match)) ;transforms the string
-      ;(set! str (transform-tokens str token-match f token))     
+          (display "")    ;TODO talves por um when em vez de if, mas deu erro
+          (set! str (transform-string str f token-match)) ;transforms the string    
     )
   ))
   (if (equal? oldStr str)
       str
       (process-string str))
 )
-
-(define (transform-tokens str token-match f token)
-  (if (equal? token-match #f)
-      str
-      (let* ([str (transform-string str f token-match)] ;transforms the string
-             [token-match (regexp-match-positions token str)]) ;tries to find match in new string
-        (transform-tokens str token-match f token)
-        )))
 
 ;with the token match in the string, calls the function f on the string after the token,
 ;then appends the string before the token with the result of the function
@@ -85,12 +76,10 @@ and the result of that function replaces the substring that starts with the toke
 
 ;tokens that we need to define
 
-;^(?!.*(red|green|blue))
-
 ;Local Type Inference
 (def-active-token "var" (str)
-  (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[(][[:word:] ,]*[)][;]" str "\\1")])
-    (displayln type)
+                               ; var                  nameeeeeee                   =            new             type  (  args             ) ...
+  (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[(][[:word:] ,\"()]*[)].*" str "\\1")])
     (if (equal? type str);if didn't found match
         (string-append "var" str)
         (string-append type str)
@@ -99,7 +88,8 @@ and the result of that function replaces the substring that starts with the toke
 
 ;String Interpolation
 (def-active-token "#" (str)
-  (regexp-replace* #px"#[{](\\S+)[}]" str "\" + (\\1) + \""))
+                      ;#{expWithout"}"}          \"+exp+\" 
+  (regexp-replace* #px"#[{]([^\\}]+)[}]" str "\" + (\\1) + \""))
 
 ;Type Aliases
 (def-active-token "alias" (str)
