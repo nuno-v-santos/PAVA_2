@@ -93,11 +93,20 @@ and the result of that function replaces the substring that starts with the toke
 
 ;Type Aliases
 (def-active-token "alias" (str)
-  (let* ([alias-op (regexp-match #px"[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*(\\S+)[[:space:]]*;" str)]
+  (let* ([regexExpr #px"[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*([^;]+);"]
+         [alias-op (regexp-match regexExpr str)]
          [left-alias (cadr alias-op)]
          [right-alias (caddr alias-op)])
+    (set! str (regexp-replace regexExpr str ""))
     ;(set! str (regexp-replace #px"[[:space:]]+[[:word:]]+[[:space:]]*=[[:space:]]*\\S+[[:space:]]*;" ""))
     (set! str (string-replace str left-alias right-alias))
     str
     )
+  )
+
+(define test-str
+#<<end
+
+
+end
   )
