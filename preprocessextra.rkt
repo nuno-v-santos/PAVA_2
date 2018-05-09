@@ -132,27 +132,39 @@ and the result of that function replaces the substring that starts with the toke
   )
 )
 
-
+;Getter and Setter generator
+;if the token genGetSet is written before a variable declaration we will write its getter and setter
+(def-active-token "genGetSet" (str)
+  (let* ([space0 "[[:space:]]*"]
+         [space1 "[[:space:]]+"]
+         [variable "([[:alpha:]_][[:word:]]*)"]
+         [modifiers "([[:alpha:]]*[[:space:]]+)*"]
+         [type "([[:alpha:]][[:word:]<>,]*)"] ;TODO talvez mudar o regex para tipo no token var, assim inclui coisas tipo A<int,int>
+                                        ;genGetSet         public    int         age              ; or  =...;     
+         [regex-expr (pregexp(string-append "^" space1 "("modifiers type space1 variable space0 "((;)|(=[^;]+;)))(.*)"))]
+        )
+    ;\\1->declaration line \\3 -> type,   \\4 -> var name  \\8->remaining code  
+    ;this contains the declaration and the getter
+    (define getter (regexp-replace regex-expr str "\\1\npublic \\3 get\\4() {return \\4;}\n" ))
+    ;this contains the setter and the remaining code
+    (define setter (regexp-replace regex-expr str "public void set\\4(\\3 value) {\\4=value;}\\8" ))
+    (if (equal? getter #f)          ;if didn't found match
+        (string-append "genGetSet" str)  ;return "genGetSet" + the input string 
+        (string-append getter setter)   ;else return the code with added getter and setter
+    )
+  )
+)
 
 (define (test-str)
   (displayln (process-string #<<end
-#include tests\simple\mixed-tokens\A.in
-public class Foo {
-    public static void main(String[] args) {
-		var a= new G();
-		var b =new F();
-		var c=new E();
-		var 	 d= 	new D();
-		var e = 
-				new C();
-		var 
-			f = new B(); var 
-			g = new A()		;
-    }
+public class Cat{
+  public int age = 10;
+  genGetSet public double weigth ;
+  genGetSet private final String name="jsdhgfjshj";
 }
 end
 )))
-
+#|
 (for ([dir (directory-list "tests/simple"  #:build? #t)])
   (for ([file (directory-list dir  #:build? #t)])
     
@@ -168,4 +180,4 @@ end
     ])
     
   )
-)
+)|#
