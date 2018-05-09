@@ -100,12 +100,13 @@ and the result of that function replaces the substring that starts with the toke
 ;Type Aliases
 (def-active-token "alias" (str)
                      ;              (left-operand)           =            (right-operand);
-  (let* ([regexExpr #px"[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*([^;]+);"]
+  (let* ([regexExpr #px"^[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*([^;]+);"]
          [alias-op (regexp-match regexExpr str)]
          [left-op (cadr alias-op)]
-         [right-op (caddr alias-op)])
+         [right-op (caddr alias-op)]
+         [alias-finder (pregexp (string-append "(\\W+)" left-op "(\\W+)"))])
     (set! str (regexp-replace regexExpr str ""))     ;removes the line of the alias definition
-    (set! str (string-replace str left-op right-op)) ;replaces the first ocurrence of left-operand with right operand
+    (set! str (regexp-replace* alias-finder str (string-append "\\1" right-op "\\2"))) ;replaces the first ocurrence of left-operand with right operand
     str
   )
 )
