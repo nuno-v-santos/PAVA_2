@@ -32,10 +32,8 @@ and the result of that function replaces the substring that starts with the toke
     (let*([token (car entry)]
           [f (cadr entry)]
           [token-match (regexp-match-positions token str)])  ;tries to find first ocurrence of the token
-      (if (equal? token-match #f)  ;if no match found
-          (display "");TODO talvez por um when em vez de if
-          (set! str (transform-string str f token-match)) ;transforms the string    
-      )
+      (cond
+        [(not (equal? token-match #f)) (set! str (transform-string str f token-match))])
     )
   )
   (if (equal? old-str str)   ;if after going for all tokens the string remains the same
@@ -82,8 +80,11 @@ and the result of that function replaces the substring that starts with the toke
 
 ;Local Type Inference
 (def-active-token "var" (str)
-                               ; var                  nameeeeeee                   =            new            (type)             ( ...   ;
-  (let* ([type (regexp-replace #px"^[[:space:]]+[[:alpha:]_][[:word:]]*[[:space:]]*=[[:space:]]*new[[:space:]]+(\\S+)[[:space:]]*[(][^;]+[;].*" str "\\1")])
+  (let* ([space0 "[[:space:]]*"]
+         [space1 "[[:space:]]+"]
+         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new           (type)           ( ...   ;
+         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "(\\S+)" space0 "[(][^;]+[;].*"))]
+         [type (regexp-replace regex-expr str "\\1")])
     (if (equal? type str)          ;if didn't found match
         (string-append "var" str)  ;return "var" + the input string 
         (string-append type str)   ;else type + the input string
@@ -109,8 +110,7 @@ and the result of that function replaces the substring that starts with the toke
          [right-op (caddr alias-op)]
          [alias-finder (pregexp (string-append "(\\W)" left-op "(\\W)"))])
     (set! str (regexp-replace regexExpr str ""))     ;removes the line of the alias definition
-    (set! str (regexp-replace* alias-finder str (string-append "\\1\\$" right-op "\\$\\2"))) ;replaces the first ocurrence of left-operand with right operand
-    str
+    (regexp-replace* alias-finder str (string-append "\\1\\$" right-op "\\$\\2")) ;replaces the first ocurrence of left-operand with right operand
   )
 )
 
@@ -120,9 +120,34 @@ and the result of that function replaces the substring that starts with the toke
 (define (test-str)
   (displayln (process-string #<<end
 public class Foo {
-    public void foo(String[] args) {
-    	var s = new String(#"#{args[0]}");
+    public static void main(String[] args) {
+		var a= new G();
+		var b =new F();
+		var c=new E();
+		var 	 d= 	new D();
+		var e = 
+				new C();
+		var 
+			f = new B(); var 
+			g = new A()		;
     }
 }
 end
 )))
+
+(for ([dir (directory-list "tests/simple"  #:build? #t)])
+  (for ([file (directory-list dir  #:build? #t)])
+    
+    (cond [(equal? (path-get-extension file) #".in")
+           (define inputString (port->string (open-input-file file)))
+           (define outputString (port->string (open-input-file (string-replace (path->string file) ".in" ".out"))))
+           (define myOutputString (process-string inputString))
+           (define out (open-output-file (string-replace (path->string file) ".in" ".myout") #:exists 'replace))
+           (display myOutputString out)
+           (close-output-port out)
+           (println file)
+           (println (equal? outputString myOutputString))
+    ])
+    
+  )
+)
