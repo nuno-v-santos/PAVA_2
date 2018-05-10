@@ -97,3 +97,15 @@
 
 ;racket will use the syntax rule and will transform to
 (bar (lambda (y) (+ 1 y)))  ;result -> 3
+
+(define (test-str)
+  (define str #<<end
+ Cache = bache;
+public class Foo {
+	public static Cache mergeCaches(Cache a, Cache b) {
+		Cache vary = new Cache();
+	}
+}
+end
+)
+  (displayln (regexp-match #px"^[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*([^;]+);" str)))
