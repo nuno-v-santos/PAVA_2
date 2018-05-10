@@ -82,10 +82,14 @@ and the result of that function replaces the substring that starts with the toke
 (def-active-token "var" (str)
   (let* ([space0 "[[:space:]]*"]
          [space1 "[[:space:]]+"]
-         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new           (type)                        ( ...   ;
-         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "([[:alpha:]][^; ]*)" space0 "[(][^;]+;.*"))]
+         [variable "[[:alpha:]_][[:word:]]*"]
+         [regex-expr (pregexp (string-append
+             ;var        name            =          new            (type)                      ( ...  ; ...
+             "^" space1 variable space0 "=" space0 "new" space1 "([[:alpha:]][^; ]*)" space0 "[(][^;]+;.*"))]
+
          [type (regexp-replace regex-expr str "\\1")])
-    (if (equal? type str)          ;if didn't found match
+
+    (if (equal? type str)          ;if no match found (string not changed)
         (string-append "var" str)  ;return "var" + the input string 
         (string-append type str)   ;else type + the input string
     )
@@ -95,22 +99,31 @@ and the result of that function replaces the substring that starts with the toke
 
 ;String Interpolation
 (def-active-token "#" (str)
-  (if(equal? (regexp-match #px"^\"" str) #f)
-      (string-append "#" str)
-                         ;#{expWithout"}"}          \"+exp+\" 
+  (if(equal? (regexp-match #px"^\"" str) #f)  ;if string doesnt start with "
+     (string-append "#" str) ;return "#" + the input string
+
+                          ;#{   exp     }       " + exp + " 
      (regexp-replace* #px"#[{]([^\\}]+)[}]" str "\" + (\\1) + \""))
 )
 
 ;Type Aliases
 (def-active-token "alias" (str)
-                     ;              (left-operand)           =            (right-operand);
+                     ;              (left-operand)            =          (right-operand);
   (let* ([regexExpr #px"^[[:space:]]+([[:word:]]+)[[:space:]]*=[[:space:]]*([^;]+);"]
-         [alias-op (regexp-match regexExpr str)]
-         [left-op (cadr alias-op)]
-         [right-op (caddr alias-op)]
-         [alias-finder (pregexp (string-append "(\\W)" left-op "(\\W)"))])
-    (set! str (regexp-replace regexExpr str ""))     ;removes the line of the alias definition
-    (regexp-replace* alias-finder str (string-append "\\1\\$" right-op "\\$\\2")) ;replaces the first ocurrence of left-operand with right operand
+         [alias-op (regexp-match regexExpr str)]) ;returns '('(all-match) '(left-op) '(right-op))
+
+    (if (equal? alias-op #f)
+        (string-append "alias" str)
+        (let* ([left-op (cadr alias-op)]
+               [right-op (caddr alias-op)]
+               [left-op-finder (pregexp (string-append "(\\W)" left-op "(\\W)"))])
+          
+          (set! str (regexp-replace regexExpr str "")) ;removes the line of the alias definition
+
+          ;replaces the first ocurrence of left-operand with right operand
+          (regexp-replace* left-op-finder str (string-append "\\1\\$" right-op "\\$\\2"))
+        )
+    )
   )
 )
 
@@ -119,19 +132,7 @@ and the result of that function replaces the substring that starts with the toke
 
 (define (test-str)
   (displayln (process-string #<<end
-public class Foo {
-    public static void main(String[] args) {
-		var a= new G();
-		var b =new F();
-		var c=new E();
-		var 	 d= 	new D();
-		var e = 
-				new C();
-		var 
-			f = new B(); var 
-			g = new A()		;
-    }
-}
+aliasadsa d = asa;
 end
 )))
 
