@@ -82,8 +82,8 @@ and the result of that function replaces the substring that starts with the toke
 (def-active-token "var" (str)
   (let* ([space0 "[[:space:]]*"]
          [space1 "[[:space:]]+"]
-         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new           (type)           ( ...   ;
-         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "(\\S+)" space0 "[(][^;]+[;].*"))]
+         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new           (type)                        ( ...   ;
+         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "([[:alpha:]][^; ]*)" space0 "[(][^;]+;.*"))]
          [type (regexp-replace regex-expr str "\\1")])
     (if (equal? type str)          ;if didn't found match
         (string-append "var" str)  ;return "var" + the input string 
