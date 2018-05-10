@@ -82,8 +82,8 @@ and the result of that function replaces the substring that starts with the toke
 (def-active-token "var" (str)
   (let* ([space0 "[[:space:]]*"]
          [space1 "[[:space:]]+"]
-         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new           (type)           ( ...   ;
-         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "(\\S+)" space0 "[(][^;]+[;].*"))]
+         [variable "[[:alpha:]_][[:word:]]*"]  ;var      name            =         new               (type)                    ( ...   ;
+         [regex-expr (pregexp (string-append "^" space1 variable space0 "=" space0 "new" space1 "([[:alpha:]][^; ]*)" space0 "[(][^;]+[;].*"))]
          [type (regexp-replace regex-expr str "\\1")])
     (if (equal? type str)          ;if didn't found match
         (string-append "var" str)  ;return "var" + the input string 
@@ -139,16 +139,16 @@ and the result of that function replaces the substring that starts with the toke
          [space1 "[[:space:]]+"]
          [variable "([[:alpha:]_][[:word:]]*)"]
          [modifiers "([[:alpha:]]*[[:space:]]+)*"]
-         [type "([[:alpha:]][[:word:]<>,]*)"] ;TODO talvez mudar o regex para tipo no token var, assim inclui coisas tipo A<int,int>
-                                        ;genGetSet         public    int         age              ; or  =...;     
-         [regex-expr (pregexp(string-append "^" space1 "("modifiers type space1 variable space0 "((;)|(=[^;]+;)))(.*)"))]
+         [type "([[:alpha:]][^; ]*)"]
+                                        ;genGetSet         public    int         name             ; or  =...;     
+         [regex-expr (pregexp(string-append "^" space1 "("modifiers type space1 variable space0 "(;|=[^;]+;))(.*)"))]
         )
-    ;\\1->declaration line \\3 -> type,   \\4 -> var name  \\8->remaining code  
+    ;\\1->declaration line \\3 -> type,   \\4 -> var name  \\6->remaining code  
     ;this contains the declaration and the getter
-    (define getter (regexp-replace regex-expr str "\\1\npublic \\3 get\\4() {return \\4;}\n" ))
+    (define getter (regexp-replace regex-expr str "\\1\npublic \\3 get_\\4() {return this.\\4;}\n" ))
     ;this contains the setter and the remaining code
-    (define setter (regexp-replace regex-expr str "public void set\\4(\\3 value) {\\4=value;}\\8" ))
-    (if (equal? getter #f)          ;if didn't found match
+    (define setter (regexp-replace regex-expr str "public void set_\\4(\\3 value) {this.\\4=value;}\\6" ))
+    (if (equal? getter str)              ;if didn't found match
         (string-append "genGetSet" str)  ;return "genGetSet" + the input string 
         (string-append getter setter)   ;else return the code with added getter and setter
     )
@@ -160,11 +160,11 @@ and the result of that function replaces the substring that starts with the toke
 public class Cat{
   public int age = 10;
   genGetSet public double weigth ;
-  genGetSet private final String name="jsdhgfjshj";
+  genGetSet private final asa sa> name="jsdhgfjshj";
 }
 end
 )))
-#|
+
 (for ([dir (directory-list "tests/simple"  #:build? #t)])
   (for ([file (directory-list dir  #:build? #t)])
     
@@ -180,4 +180,4 @@ end
     ])
     
   )
-)|#
+)
